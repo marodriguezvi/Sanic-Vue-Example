@@ -40,6 +40,7 @@ export default {
   methods: {
     getItem() {
       this.item = '';
+      this.error = '';
       this.$http.get('http://localhost:8000/user', { params: {id: this.id} })
         .then(response => {
           this.item = response.body;
@@ -48,7 +49,8 @@ export default {
         });
     },
     getItems() {
-      this.$http.get('http://localhost:8000/users')
+      this.error = '';
+      this.$http.get('http://localhost:8000/users', { params: {order_type: 'desc'}})
         .then(response => {
           this.items = response.body;
         }, error => {
