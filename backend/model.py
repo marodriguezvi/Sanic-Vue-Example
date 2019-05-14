@@ -1,29 +1,26 @@
-
 import requests
+import pymongo
+from pymongo import MongoClient
 import exceptions as exc
 
-url  = 'https://domain.freshdesk.com/api/v2/tickets'
-password = 'password'
-email = 'email'
+cliente = MongoClient()
+db = cliente['api-tickets']
+collection = db['tickets']
 
-def get_one(id):
-  global url, email, password
-  response = requests.get((url+'/'+id), auth=(email, password))
-  if not response:
+def get_one(_id):
+  document = collection.find_one({'_id': int(_id)})
+  if not document:
     raise exc.ItemNotStored('The item doesn\'t exist')
-  else:
-    response = response.json()
-  return response
+
+  return document
 
 def get_all(order_type):
-  global url, email, password
-  # Orders ascending or descending according to the expiration date of the ticket
-  params = {'order_by': 'due_by', 'order_type': 'desc'}
+  # Orders ascending or descending according to the id
+  order = pymongo.ASCENDING
   if order_type:
-    params['order_type'] = order_type
-  response = requests.get(url, auth=(email, password), params=params)
-  if not response:
+    order = pymongo.ASCENDING if (order_type == 'asc') else pymongo.DESCENDING 
+  documents = collection.find().sort('_id', order)
+  if not documents:
     raise exc.ItemsNotStored('There aren\'t items')
-  else:
-    response = response.json()
-  return response
+
+  return documents
