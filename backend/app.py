@@ -35,12 +35,12 @@ async def get_users(request):
   except exc.ItemsNotStored as e:
     return response.json({'error': e.args[0]}, status = 404)
   else:
-    message = []
+    message = list()
     
     for item in data:
       message.append({
           'subject': item.get('subject'),
-          'id': item.get('id'),
+          'id': item.get('_id'),
           'priority': item.get('priority')
         })
     return response.json(message, status = 200)
