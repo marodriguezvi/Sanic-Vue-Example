@@ -39,9 +39,13 @@ async def get_users(request):
     
     for item in data:
       message.append({
-          'subject': item.get('subject'),
+          'due_by': item.get('due_by'),
           'id': item.get('_id'),
-          'priority': item.get('priority')
+          'status': item.get('status'),
+          'priority': item.get('priority'),
+          'type': item.get('type'),
+          'name': item.get('name'),
+          'responder_id': item.get('responder_id')
         })
     return response.json(message, status = 200)
 
