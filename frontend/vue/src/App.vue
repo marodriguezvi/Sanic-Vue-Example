@@ -1,29 +1,82 @@
 <template>
-  <div class="contenedor">
+  <div class="container">
     <header class="title">
-    <h1>Using Freshdesk Developer</h1>
+    <h2>Data viewer</h2>
     </header>
     <div class="content-one">
-      <label>id ticket</label>
-      <input type="number" autofocus v-model="id">
-      <button @click="getItem">Select One</button>
-      <button @click="getItems">Select All</button>
-      <div v-if="items.length > 0">
-        <h4>Items</h4>
-        <ul class="list">
-          <li class="list-item" v-for="item in items" :key="item.id" @click="id = item.id">
-            Subject: {{ item.subject }} - id: {{ item.id }} - Priority: {{ item.priority }}
-          </li>
-        </ul>
+      <h3>Filter</h3>
+      <label class="date-from" for="datefrom">From</label>
+      <input type="date" id="datefrom" v-model="dateFrom">
+      
+      <label class="date-to" for="dateto">To</label>
+      <input type="date" id="dateto" :min="dateFrom" v-model="dateTo">
+    </div>    
+    <div class="content-two">
+      <label for="status" class="status">Status</label>
+      <select id="status" v-model="status">
+        <option selected value="">-- All --</option>
+        <option value="2">Open</option>
+        <option value="3">Pending</option>
+        <option value="4">Resolved</option>
+        <option value="5">Closed</option>
+      </select>
+      
+      <label for="priority" class="priority">Priority</label>
+      <select id="priority" v-model="priority">
+        <option selected value="">-- All --</option>
+        <option value="1">Low</option>
+        <option value="2">Medium</option>
+        <option value="3">High</option>
+        <option value="4">Urgent</option>
+      </select>
+      
+      <label for="type" class="type">Type</label>
+      <select id="type" v-model="type">
+        <option selected value="">-- All --</option>
+        <option value="Question">Question</option>
+        <option value="Incident">Incident</option>
+        <option value="Problem">Problem</option>
+        <option value="Feature Request">Feature Request</option>
+        <option value="Refund">Refund</option>
+      </select>
+
+      <input type="number" placeholder="Ticket ID" v-model="id">
+      <input type="number" placeholder="Agent ID" v-model="agent">
     </div>
-    </div>
-    <div class="content-two" v-if="item">
-      <h4>Item</h4>
-      <p>{{ item.subject }}</p>
-      <p>{{ item.description }}</p>
-    </div>
-    <div class="content-two error" v-else>
-      <p>{{ error.error }}</p>
+    <div class="content-three">
+      <div>
+        <table class="table">
+            <tr>
+              <th style="width:16%">Date to Solve</th>
+              <th style="width:8%">Ticket ID</th>
+              <th style="width:8%">Status</th>
+              <th style="width:8%">Priority</th>
+              <th style="width:12%">Type</th>
+              <th style="width:15%">Agent Name</th>
+              <th style="width:12%">Agent ID</th>
+            </tr>
+            <tr class="table-item" v-for="item in filteredItems" :key="item.id">
+              <td>{{ item.due_by }}</td>
+              <td>{{ item.id }}</td>
+              <td>{{ item.status }}</td>
+              <td>{{ item.priority }}</td>
+              <td>{{ item.type }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.responder_id }}</td>
+            </tr>
+            <tbody v-if="filteredItems.length < 9">
+              <tr v-for="i in (9 - filteredItems.length)" :key="i.id">
+                <td>&nbsp;</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+      </div>
     </div>
   </div>  
 </template>
@@ -32,30 +85,53 @@ export default {
   data() {
     return {
       id: '',
-      item: null,
+      agent: '',
+      dateFrom: '',
+      dateTo: '',
       items: [],
-      error: ''
+      status: '',
+      priority: '',
+      type: ''
     }
   },
-  methods: {
-    getItem() {
-      this.item = '';
-      this.error = '';
-      this.$http.get('http://localhost:8000/user', { params: {id: this.id} })
-        .then(response => {
-          this.item = response.body;
-        }, error => {
-          this.error = error.body;
-        });
-    },
-    getItems() {
-      this.error = '';
-      this.$http.get('http://localhost:8000/users', { params: {order_type: 'desc'}})
+  created() {
+    this.$http.get('http://localhost:8000/users', { params: {order_type: 'desc'}})
         .then(response => {
           this.items = response.body;
         }, error => {
           this.error = error.body;          
         });
+  },
+  methods: {
+  },
+  computed: {
+    filteredItems() {
+      var result = this.items.filter((item) => item.due_by >= this.dateFrom);
+      if (this.id) {
+        result = this.items.filter((item) => item.id == this.id);
+        console.log('one');
+      }
+      if (this.agent) {
+        result = result.filter((item) => item.responder_id == this.agent);
+        console.log('two');
+      }
+      if (this.dateTo) {
+        result = result.filter((item) => item.due_by <= this.dateTo);
+        console.log('three');
+      }
+      if (this.status) {
+        result = result.filter((item) => item.status == this.status);
+        console.log('four');        
+        }
+      if (this.priority) {
+        result = result.filter((item) => item.priority == this.priority);
+        console.log('five');        
+        }
+      if (this.type) {
+        result = result.filter((item) => item.type == this.type);
+        console.log('six');        
+        }
+      return result;
     }
   }
 }
@@ -74,55 +150,55 @@ body{
 	box-sizing: border-box;
 }
 
-/* ========> layout of the application with CSS Grid <========*/
+/* ========> Application desing with CSS Grid <========*/
 
-.contenedor{
+.container{
 	width: 100%;
-  height: auto;
+  height: 100%;
   display: grid;
-  /* 2 columna */
-  grid-template-columns: 50% 50%;
-  /* 2 filas */
-  grid-template-rows: 70px 1fr;
+  padding: 0px 40px;
+  /* 1 columna */
+  grid-template-columns: 100%;
+  /* 4 filas */
+  grid-template-rows: auto auto auto 1fr;
 }
 
 .title {
-  text-align: center;
-  padding: 5px;
-  margin: 10px;
-  grid-column: 1 / 3;
-  grid-row: 1 /2;
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
 }
 
 .content-one {
+  margin-top: 1%;
   grid-column: 1 / 2;
-  grid-row: 2 / 3; 
-  padding-left: 20px;
-  padding-top: 20px;
+  grid-row: 2 / 3;
 }
 
 .content-two {
-  grid-column: 2 / 3;
-  grid-row: 2 / 3;
-  padding-left: 20px;
-  padding-top: 20px;
+  margin-top: 1%;
+  grid-column: 1 / 2;
+  grid-row: 3 / 4;
 }
 
-
-/* ========> Styles for the content 1 <========*/
-
-.content-one label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+.content-three {
+  height: 100%;
+  margin-top: 1%;
+  grid-column: 1 / 2;
+  grid-row: 4 / 5;
 }
 
-.content-one input {
-  display: block;
-  width: 60%;
+/* ========> Styles for the content 1 - 3 <========*/
+
+.title {
+  padding: 10px 0px;
+}
+
+.container input, .container select {
+  display: inline;
+  width: 130px;
   height: 30px;
-  padding: 6px;
-  margin-bottom: 20px;
+  padding-left: 6px;
+  margin: 10px 0px;
   color: #555;
   background-color: #fff;
   border: 1px solid #ccc;
@@ -130,59 +206,59 @@ body{
   outline: none;
 }
 
-.content-one button {
-  display: block;
-  color: #fff;
-  background-color: #337ab7;
-  border-color: #2e6da4;
-  border-radius: 4px;
-  margin-bottom: 15px;
-  padding: 6px;
-  cursor: pointer;
-  border: 1px solid transparent;
-}
-.content-one button:hover {
-  background-color: #0663b4;
+.content-two .priority, .content-two .type, .content-two input, .content-one .date-to {
+  margin-left: 3%;
 }
 
-.list {
-  margin-top: 10px;
+.content-three div {
+  overflow-y: scroll;
+  height: 350px;
 }
 
-.list-item {
-  list-style-type: none;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  padding: 8px 10px;
-  margin-bottom: -1px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  width: 75%;
-  cursor: pointer;
+.content-three .table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
 }
 
-
-/* ========> Styles for the content 2 <========*/
-
-.content-two h4 {
-  margin-bottom: 5px;
+.table td, .table th {
+  border-bottom: 1px solid #dddddd;
+  padding: 8px;
 }
 
-.content-two p {
-  margin-bottom: 7px;
+.table tr:nth-child(even) {
+  background-color: #f2f2f2;
 }
 
-.error {
-  color: red;
+.table tr:hover {
+  background-color: #f9f9f9;
 }
 
+/* ========> Styles for the scrollbar <========*/
 
-/* ========> Remove the arrows from the numeric fields  <========*/
+::-webkit-scrollbar {
+      width: 10px;
+}
 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
+::-webkit-scrollbar-track {
+      background-color: #f8f8f8;
+} 
+
+::-webkit-scrollbar-thumb {
+      background-color: #ddd;
+} 
+
+/* ::-webkit-scrollbar-button {
+      background-color: navy;
+}
+*/
+
+/* ========> Remove the arrows from the date fields  <========*/
+
+input[type=date]::-webkit-inner-spin-button, 
+input[type=date]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
   margin: 0;
 }
-input[type=number] { -moz-appearance:textfield; }
+input[type=input] { -moz-appearance:textfield; }
 </style>
