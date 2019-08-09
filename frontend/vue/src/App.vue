@@ -1,8 +1,10 @@
 <template>
-  <div class="container">
+  <div>
     <header class="title">
     <h2>Data viewer</h2>
+    <a href="https://github.com/mrodriguezv/Sanic-Vue-Example" target="_blank">GitHub</a>
     </header>
+  <div class="container">
     <div class="content-one">
       <h3>Filter</h3>
       <label class="date-from" for="datefrom">From</label>
@@ -44,8 +46,7 @@
       <input type="number" placeholder="Agent ID" v-model="agent">
     </div>
     <div class="content-three">
-      <div>
-        <table class="table">
+        <table class="t-head">
             <tr>
               <th style="width:16%">Date to Solve</th>
               <th style="width:8%">Ticket ID</th>
@@ -55,14 +56,17 @@
               <th style="width:15%">Agent Name</th>
               <th style="width:12%">Agent ID</th>
             </tr>
-            <tr class="table-item" v-for="item in filteredItems" :key="item.id">
-              <td>{{ item.due_by }}</td>
-              <td>{{ item.id }}</td>
-              <td>{{ item.status }}</td>
-              <td>{{ item.priority }}</td>
-              <td>{{ item.type }}</td>
-              <td>{{ item.name }}</td>
-              <td>{{ item.responder_id }}</td>
+        </table>
+        <div>
+        <table class="t-body">          
+            <tr v-for="item in filteredItems" :key="item.id">
+              <td style="width:16%">{{ item.due_by }}</td>
+              <td style="width:8%">{{ item.id }}</td>
+              <td style="width:8%">{{ item.status }}</td>
+              <td style="width:8%">{{ item.priority }}</td>
+              <td style="width:12%">{{ item.type }}</td>
+              <td style="width:15%">{{ item.name }}</td>
+              <td style="width:12%">{{ item.responder_id }}</td>
             </tr>
             <tbody v-if="filteredItems.length < 9">
               <tr v-for="i in (9 - filteredItems.length)" :key="i.id">
@@ -73,11 +77,12 @@
                 <td></td>
                 <td></td>
                 <td></td>
-            </tr>
+              </tr>
             </tbody>
         </table>
       </div>
     </div>
+  </div>
   </div>  
 </template>
 <script>
@@ -138,18 +143,6 @@ export default {
 </script>
 <style scoped>
 
-/* =========> General Styles <========= */
-
-body{
-	background-color: #fff;
-}
-
-*{
-  margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-}
-
 /* ========> Application desing with CSS Grid <========*/
 
 .container{
@@ -159,38 +152,44 @@ body{
   padding: 0px 40px;
   /* 1 columna */
   grid-template-columns: 100%;
-  /* 4 filas */
-  grid-template-rows: auto auto auto 1fr;
-}
-
-.title {
-  grid-column: 1 / 2;
-  grid-row: 1 / 2;
+  /* 3 filas */
+  grid-template-rows: auto auto 1fr;
 }
 
 .content-one {
   margin-top: 1%;
   grid-column: 1 / 2;
-  grid-row: 2 / 3;
+  grid-row: 1 / 2;
 }
 
 .content-two {
   margin-top: 1%;
   grid-column: 1 / 2;
-  grid-row: 3 / 4;
+  grid-row: 2 / 3;
 }
 
 .content-three {
   height: 100%;
   margin-top: 1%;
   grid-column: 1 / 2;
-  grid-row: 4 / 5;
+  grid-row: 3 / 4;
 }
 
 /* ========> Styles for the content 1 - 3 <========*/
 
 .title {
-  padding: 10px 0px;
+  padding: 20px 40px;
+  background-color: #f3f3f3;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title a {
+  right: 10%;
+  color: #1b1f23b3;
+  text-decoration: none;
 }
 
 .container input, .container select {
@@ -212,25 +211,25 @@ body{
 
 .content-three div {
   overflow-y: scroll;
-  height: 350px;
+  height: 320px;
 }
 
-.content-three .table {
+.content-three table {
   width: 100%;
   text-align: left;
   border-collapse: collapse;
 }
 
-.table td, .table th {
+.content-three td, .content-three th {
   border-bottom: 1px solid #dddddd;
   padding: 8px;
 }
 
-.table tr:nth-child(even) {
+.t-body tr:nth-child(odd) {
   background-color: #f2f2f2;
 }
 
-.table tr:hover {
+.t-body tr:hover {
   background-color: #f9f9f9;
 }
 
