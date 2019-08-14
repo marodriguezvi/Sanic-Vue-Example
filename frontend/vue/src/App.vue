@@ -2,6 +2,8 @@
   <div>
     <header class="title">
     <h2>Data viewer</h2>
+    <font-awesome-icon v-if="update" class="icon" icon="ban" @click="updateItems"/>
+    <font-awesome-icon v-else class="icon" icon="sync-alt" @click="updateItems"/>
     <a href="https://github.com/mrodriguezv/Sanic-Vue-Example" target="_blank">GitHub</a>
     </header>
   <div class="container">
@@ -87,6 +89,7 @@
 </template>
 <script>
 export default {
+
   data() {
     return {
       id: '',
@@ -96,45 +99,53 @@ export default {
       items: [],
       status: '',
       priority: '',
-      type: ''
+      type: '',
+      update: false,
+      intervalId: ''
     }
   },
-  created() {
-    this.$http.get('http://localhost:8000/users', { params: {order_type: 'desc'}})
+  mounted() {
+    this.getUsers();
+  },
+  methods: {
+    updateItems() {
+      this.update = !this.update;
+      if(this.update){
+        this.intervalId = setInterval(() => {this.getUsers()}, 10000);
+      } else {
+        clearInterval(this.intervalId);
+      }
+    },
+    getUsers() {
+      this.$http.get('http://localhost:8000/users', { params: {order_type: 'desc'}})
         .then(response => {
           this.items = response.body;
+          console.log(this.items);
         }, error => {
           this.error = error.body;          
         });
-  },
-  methods: {
+    }
   },
   computed: {
     filteredItems() {
       var result = this.items.filter((item) => item.due_by >= this.dateFrom);
       if (this.id) {
         result = this.items.filter((item) => item.id == this.id);
-        console.log('one');
       }
       if (this.agent) {
         result = result.filter((item) => item.responder_id == this.agent);
-        console.log('two');
       }
       if (this.dateTo) {
         result = result.filter((item) => item.due_by <= this.dateTo);
-        console.log('three');
       }
       if (this.status) {
         result = result.filter((item) => item.status == this.status);
-        console.log('four');        
         }
       if (this.priority) {
         result = result.filter((item) => item.priority == this.priority);
-        console.log('five');        
         }
       if (this.type) {
         result = result.filter((item) => item.type == this.type);
-        console.log('six');        
         }
       return result;
     }
@@ -179,7 +190,7 @@ export default {
 
 .title {
   padding: 20px 40px;
-  background-color: #f3f3f3;
+  background-color: #f1f3f5;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -188,8 +199,19 @@ export default {
 
 .title a {
   right: 10%;
-  color: #1b1f23b3;
+  color: #495057;
   text-decoration: none;
+}
+
+.icon {
+  position: absolute;
+  right: 100px;
+  font-size: 1.05em;
+  color: #495057;
+}
+
+.icon:hover {
+  color: #17191b;
 }
 
 .container input, .container select {
@@ -226,7 +248,7 @@ export default {
 }
 
 .t-body tr:nth-child(odd) {
-  background-color: #f2f2f2;
+  background-color: #f1f3f5;
 }
 
 .t-body tr:hover {
